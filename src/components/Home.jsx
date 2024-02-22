@@ -1,10 +1,19 @@
-import Header from "./Header"
+import { useSelector } from "react-redux";
+import useNowPlayingData from "../customHooks/useNowPlayingData";
+import Header from "./Header";
+import PrimaryComp from "./PrimaryComp";
+import SecondaryComp from "./SecondaryComp";
 
 const Home = () => {
+  useNowPlayingData();
+  const nowPlaying = useSelector((state) => state?.nowPlayingMovie?.nowPlaying);
   return (
     <div>
         <Header />
-      Hello World
+        <div className="bg-black pb-4">
+          <PrimaryComp movies={nowPlaying}/>
+          <SecondaryComp />
+        </div>
     </div>
   )
 }

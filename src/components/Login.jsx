@@ -2,24 +2,24 @@
 import { useRef, useState } from "react";
 import Header from "./Header";
 import validation from "../utils/validation";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../utils/fireBaseSetup";
 import { useDispatch } from "react-redux";
 import { login } from "../store/userSlice";
-import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [signIn, setSignIn] = useState(true);
   const [error, setError] = useState(null);
   const email = useRef(null);
   const password = useRef(null);
+  const fullName = useRef(null);
   const [loading , setLoading] = useState(false)
 
   const handleSubmit = () => {
-    let emailValue = email.current.value;
-    let passwordValue = password.current.value;
+    let nameValue = fullName.current?.value;
+    let emailValue = email.current?.value;
+    let passwordValue = password.current?.value;
     setError(validation(emailValue, passwordValue))
       if (error) return;
       if (signIn) {
@@ -27,22 +27,29 @@ const Login = () => {
             .then((userCredential) => {
               const user = userCredential.user;
               setLoading(true)
-              dispatch(login(user.uid));
+              const { displayName, email, uid } = user;
+              dispatch(login({displayName, email, uid}));
               setLoading(false)
-              navigate("/browse")
             })
             .catch((error) => {
               const errorCode = error.code;
               const errorMessage = error.message;
-              setError(errorCode - errorMessage);
+              setError(errorCode + "-" + errorMessage);
             });
         } else {
           createUserWithEmailAndPassword(auth, emailValue, passwordValue)
           .then((userCredential) => {
               console.log(emailValue, passwordValue)
               const user = userCredential.user;
-              dispatch(login(user.uid));
-              navigate("/browse")
+              updateProfile(auth.currentUser, {
+                displayName: nameValue
+              }).then(() => {
+                console.log("Profile updated")
+              }).catch((error) => {
+                console.log(error)
+              });
+              const { displayName, email, uid } = user;
+              dispatch(login({displayName, email, uid}));
             })
             .catch((error) => {
               const errorCode = error.code;
@@ -79,6 +86,7 @@ const Login = () => {
               type="text"
               placeholder="Name"
               className="w-full py-3 px-6 bg-gray-900 rounded-lg outline-none"
+              ref={fullName}
             />
           )}
           <input
@@ -111,7 +119,7 @@ const Login = () => {
             </div>
           </div>
           <p className="text-gray-500">
-            {signIn ? "New to Netflix?" : "Already have account?"}{" "}
+            {signIn ? "New to Netflix?" : "Already have account?"}
             <span
               className="text-white cursor-pointer hover:underline"
               onClick={toggleSignin}
