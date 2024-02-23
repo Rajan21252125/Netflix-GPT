@@ -3,6 +3,7 @@ import useNowPlayingData from "../customHooks/useNowPlayingData";
 import Header from "./Header";
 import PrimaryComp from "./PrimaryComp";
 import SecondaryComp from "./SecondaryComp";
+import Footer from "./Footer";
 
 const Home = () => {
   useNowPlayingData();
@@ -14,6 +15,7 @@ const Home = () => {
           <PrimaryComp movies={nowPlaying}/>
           <SecondaryComp />
         </div>
+        <Footer />
     </div>
   )
 }
